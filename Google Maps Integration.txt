@@ -1,0 +1,127 @@
+
+
+1)
+
+Update your App Level Gradle file with following dependency:
+
+dependencies {
+   implementation 'com.google.android.gms:play-services-maps:16.1.0'
+}
+
+
+2)
+
+Add the following permissions in your menifest file:
+ <uses-permission android:name="android.permission.INTERNET" />
+ <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+ <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+
+3)
+
+Get Your Api key from Google Maps Platfor console:
+  i. sign in to your gmail account.
+  ii. follow the url https://console.cloud.google.com/google/maps-apis/start?pli=1
+
+4)
+Add following meta-data toag to your activity and application tag in menifest file:
+
+	//both in activity and application tag.
+	   <meta-data
+            	android:name="com.google.android.geo.API_KEY"
+           	 android:value="Your Api Key" />
+	//in just application tag:
+	 <meta-data android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+
+
+5)
+Update your activity_main.xml file with the following SupportMapFragment:
+
+  <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/map"
+        tools:context=".MainActivity"
+        android:name="com.google.android.gms.maps.SupportMapFragment" />
+
+
+6)
+
+Update your MainActivity.java file with the following code:
+
+   public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+    static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS=23;
+    private GoogleMap mMap;
+    Button btn;
+   
+   @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        checkPermission();
+    }
+
+  private void checkPermission(){
+        if ( ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION )
+                != PackageManager.PERMISSION_GRANTED ) {
+
+            ActivityCompat.requestPermissions( this, new String[] {  android.Manifest.permission.ACCESS_COARSE_LOCATION  },
+                    MY_PERMISSIONS_REQUEST_READ_CONTACTS );
+        }
+        else{
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+        }
+
+    }
+
+   @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+                    mapFragment.getMapAsync(this);
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+        }
+    }
+
+
+  @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        mMap.setMyLocationEnabled(true);
+        mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+            @Override
+            public void onMyLocationChange(Location location) {
+                LatLng latlng=new LatLng(location.getLatitude(),location.getLongitude());
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(latlng);
+
+                markerOptions.title("My Marker");
+                mMap.clear();
+                CameraUpdate cameraUpdate= CameraUpdateFactory.newLatLngZoom(
+                        latlng, 15);
+                mMap.animateCamera(cameraUpdate);
+                mMap.addMarker(markerOptions);
+
+            }
+        });
+
+    }
+
+
+
+7) Test Your Map and Enjoy :)
+
+
